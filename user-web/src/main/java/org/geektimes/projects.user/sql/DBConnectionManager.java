@@ -44,39 +44,56 @@ public class DBConnectionManager {
 
     public static final String DROP_USERS_TABLE_DDL_SQL = "DROP TABLE users";
 
-    public static final String CREATE_USERS_TABLE_DDL_SQL = "CREATE TABLE users(" +
-            "id INT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), " +
-            "name VARCHAR(16) NOT NULL, " +
-            "password VARCHAR(64) NOT NULL, " +
-            "email VARCHAR(64) NOT NULL, " +
-            "phoneNumber VARCHAR(64) NOT NULL" +
-            ")";
+    public static final String CREATE_USERS_TABLE_DDL_SQL = "CREATE TABLE users("
+        + "id INT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+        + "name VARCHAR(16) NOT NULL, " + "password VARCHAR(64) NOT NULL, " + "email VARCHAR(64) NOT NULL, "
+        + "phoneNumber VARCHAR(64) NOT NULL" + ")";
 
-    public static final String INSERT_USER_DML_SQL = "INSERT INTO users(name,password,email,phoneNumber) VALUES " +
-            "('A','******','a@gmail.com','1') , " +
-            "('B','******','b@gmail.com','2') , " +
-            "('C','******','c@gmail.com','3') , " +
-            "('D','******','d@gmail.com','4') , " +
-            "('E','******','e@gmail.com','5')";
+    public static final String CREATE_USERS_TABLE_DDL_SQL_NO_INCREMENT =
+        "CREATE TABLE users(id INT NOT NULL PRIMARY KEY, name VARCHAR(16) NOT NULL, "
+            + "password VARCHAR(64) NOT NULL, " + "email VARCHAR(64) NOT NULL, " + "phoneNumber VARCHAR(64) NOT NULL"
+            + ")";
 
+    public static final String INSERT_USER_DML_SQL =
+        "INSERT INTO users(name,password,email,phoneNumber) VALUES " + "('A','******','a@gmail.com','1') , "
+            + "('B','******','b@gmail.com','2') , " + "('C','******','c@gmail.com','3') , "
+            + "('D','******','d@gmail.com','4') , " + "('E','******','e@gmail.com','5')";
+
+    public static void testDel() throws SQLException {
+        String databaseURL = "jdbc:derby:/db/user-platform;create=true";
+        Connection connection = DriverManager.getConnection(databaseURL);
+
+        Statement statement = connection.createStatement();
+
+        System.out.println(statement.execute(DROP_USERS_TABLE_DDL_SQL));
+        // System.out.println(statement.execute(CREATE_USERS_TABLE_DDL_SQL));
+        System.out.println(statement.execute(CREATE_USERS_TABLE_DDL_SQL_NO_INCREMENT));
+
+        connection.close();
+    }
 
     public static void main(String[] args) throws Exception {
-//        通过 ClassLoader 加载 java.sql.DriverManager -> static 模块 {}
-//        DriverManager.setLogWriter(new PrintWriter(System.out));
-//
-//        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-//        Driver driver = DriverManager.getDriver("jdbc:derby:/db/user-platform;create=true");
-//        Connection connection = driver.connect("jdbc:derby:/db/user-platform;create=true", new Properties());
+        testDel();
+        // initTest();
+    }
+
+    public static void initTest() throws Exception {
+        // 通过 ClassLoader 加载 java.sql.DriverManager -> static 模块 {}
+        // DriverManager.setLogWriter(new PrintWriter(System.out));
+        //
+        // Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        // Driver driver = DriverManager.getDriver("jdbc:derby:/db/user-platform;create=true");
+        // Connection connection = driver.connect("jdbc:derby:/db/user-platform;create=true", new Properties());
 
         String databaseURL = "jdbc:derby:/db/user-platform;create=true";
         Connection connection = DriverManager.getConnection(databaseURL);
 
         Statement statement = connection.createStatement();
         // 删除 users 表
-        System.out.println(statement.execute(DROP_USERS_TABLE_DDL_SQL)); // false
+        // System.out.println(statement.execute(DROP_USERS_TABLE_DDL_SQL)); // false
         // 创建 users 表
-        System.out.println(statement.execute(CREATE_USERS_TABLE_DDL_SQL)); // false
-        System.out.println(statement.executeUpdate(INSERT_USER_DML_SQL));  // 5
+        // System.out.println(statement.execute(CREATE_USERS_TABLE_DDL_SQL)); // false
+        // System.out.println(statement.executeUpdate(INSERT_USER_DML_SQL)); // 5
 
         // 执行查询语句（DML）
         ResultSet resultSet = statement.executeQuery("SELECT id,name,password,email,phoneNumber FROM users");
@@ -89,13 +106,11 @@ public class DBConnectionManager {
             System.out.println(propertyDescriptor.getName() + " , " + propertyDescriptor.getPropertyType());
         }
 
-
         // 写一个简单的 ORM 框架
         while (resultSet.next()) { // 如果存在并且游标滚动
             User user = new User();
 
             // ResultSetMetaData 元信息
-
 
             ResultSetMetaData metaData = resultSet.getMetaData();
             System.out.println("当前表的名称：" + metaData.getTableName(1));
@@ -115,11 +130,11 @@ public class DBConnectionManager {
             System.out.println(queryAllUsersSQLBuilder);
 
             // 方法直接调用（编译时，生成字节码）
-//            user.setId(resultSet.getLong("id"));
-//            user.setName(resultSet.getString("name"));
-//            user.setPassword(resultSet.getString("password"));
-//            user.setEmail(resultSet.getString("email"));
-//            user.setPhoneNumber(resultSet.getString("phoneNumber"));
+            // user.setId(resultSet.getLong("id"));
+            // user.setName(resultSet.getString("name"));
+            // user.setPassword(resultSet.getString("password"));
+            // user.setEmail(resultSet.getString("email"));
+            // user.setPhoneNumber(resultSet.getString("phoneNumber"));
 
             // 利用反射 API，来实现字节码提升
 
@@ -139,7 +154,7 @@ public class DBConnectionManager {
                 // PropertyDescriptor ReadMethod 等于 Getter 方法
                 // PropertyDescriptor WriteMethod 等于 Setter 方法
                 Method setterMethodFromUser = propertyDescriptor.getWriteMethod();
-                // 以 id 为例，  user.setId(resultSet.getLong("id"));
+                // 以 id 为例， user.setId(resultSet.getLong("id"));
                 setterMethodFromUser.invoke(user, resultValue);
             }
 

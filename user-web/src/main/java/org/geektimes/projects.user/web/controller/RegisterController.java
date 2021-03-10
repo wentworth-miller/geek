@@ -16,6 +16,6 @@ public class RegisterController implements PageController {
     @Path("/index")
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) throws Throwable {
-        return "login-form.jsp";
+        return "register-form.jsp";
     }
 }
